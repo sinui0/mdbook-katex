@@ -1,21 +1,23 @@
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::{Path, PathBuf};
-use std::vec::Vec;
+use std::{
+    collections::{HashMap, HashSet},
+    fs::File,
+    io::prelude::*,
+    path::{Path, PathBuf},
+    vec::Vec,
+};
 
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde_derive::{Deserialize, Serialize};
 use toml;
 
-use mdbook::book::{Book, BookItem};
-use mdbook::errors::Error;
-use mdbook::errors::Result;
-use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use mdbook::renderer::{RenderContext, Renderer};
-use mdbook::utils::fs::path_to_root;
+use mdbook::{
+    book::{Book, BookItem},
+    errors::{Error, Result},
+    preprocess::{Preprocessor, PreprocessorContext},
+    renderer::{RenderContext, Renderer},
+    utils::fs::path_to_root,
+};
 
 #[derive(Deserialize, Serialize)]
 #[serde(default, rename_all = "kebab-case")]
@@ -102,14 +104,15 @@ impl Preprocessor for KatexProcessor {
             katex_header(&ctx.root, &ctx.config.build.build_dir, &cfg)?;
         book.for_each_mut(|item| {
             if let BookItem::Chapter(chapter) = item {
-                let stylesheet_header =
-                    stylesheet_header_generator(path_to_root(chapter.path.clone().unwrap()));
-                chapter.content = self.process_chapter(
-                    &chapter.content,
-                    &inline_opts,
-                    &display_opts,
-                    &stylesheet_header,
-                )
+                if let Some(path) = chapter.path.clone() {
+                    let stylesheet_header = stylesheet_header_generator(path_to_root(path));
+                    chapter.content = self.process_chapter(
+                        &chapter.content,
+                        &inline_opts,
+                        &display_opts,
+                        &stylesheet_header,
+                    )
+                }
             }
         });
         Ok(book)
